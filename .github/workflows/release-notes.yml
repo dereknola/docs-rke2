@@ -27,11 +27,16 @@ jobs:
       - name: Get current month and year
         id: date
         run: echo "month_year=$(date +'%B %Y')" >> $GITHUB_ENV
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: update release-notes/v1.XX.X.md
-          title: Update Release Notes ${{ steps.date.outputs.month_year }}
-          body: Automated release notes update
-          branch: update-release-notes
-          signoff: true
+      - name: Commit release notes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b update-release-notes
+          git add docs/release-notes/*
+          git commit -s -m "update release-notes/v1.XX.X.md"
+      - name: Create pull request
+        run: |
+          gh pr create --title "Update release notes for $month_year" \
+          --body "Automated release notes update" --base main \
+          --head update-release-notes --repo rancher/rke2-docs
+
