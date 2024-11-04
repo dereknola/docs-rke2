@@ -34,9 +34,11 @@ jobs:
           git checkout -b update-release-notes
           git add docs/release-notes/*
           git commit -s -m "update release-notes/v1.XX.X.md"
+          git push -f --set-upstream origin update-release-notes
       - name: Create pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh pr create --title "Update release notes for $month_year" \
-          --body "Automated release notes update" --base main \
-          --head update-release-notes --repo rancher/rke2-docs
+          --body "Automated release notes update" --base main --repo ${{ github.repository }}
 
