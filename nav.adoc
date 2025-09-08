@@ -18,6 +18,7 @@
 ** xref:upgrades/upgrade.adoc[Overview]
 ** xref:upgrades/manual_upgrade.adoc[]
 ** xref:upgrades/automated_upgrade.adoc[]
+** xref:upgrades/roll-back.adoc[]
 
 * Security
 ** xref:security/about_hardened_images.adoc[]
@@ -44,6 +45,7 @@
 ** xref:networking/basic_network_options.adoc[]
 ** xref:networking/multus_sriov.adoc[]
 ** xref:networking/networking_services.adoc[]
+** xref:networking/windows_bgp.adoc[]
 * xref:helm.adoc[]
 * xref:advanced.adoc[]
 
@@ -51,6 +53,7 @@
 ** xref:reference/cli_tools.adoc[]
 ** xref:reference/linux_agent_config.adoc[]
 ** xref:reference/logging.adoc[]
+** xref:reference/metrics.adoc[]
 ** xref:reference/resource_profiling.adoc[]
 ** xref:reference/server_config.adoc[]
 ** xref:reference/windows_agent_config.adoc[]
