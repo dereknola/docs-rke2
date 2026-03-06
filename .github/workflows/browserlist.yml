@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
 jobs:
   browserlist:
-    if: github.repository == 'rancher/rke2-docs'
+    # if: github.repository == 'rancher/rke2-docs'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
