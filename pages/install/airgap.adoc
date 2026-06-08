@@ -20,7 +20,7 @@ If you have not yet set up a private Docker registry, refer to the https://distr
 ==== Create the Registry YAML and Push Images
 
 . Obtain the images archive for your architecture from the https://github.com/rancher/rke2/releases[releases] page for the version of RKE2 you will be running.
-. Assuming amd64, use `docker image load rke2-images.linux-amd64.tar.zst` to import images from the tar file into docker.
+. Assuming amd64, use `docker image load -i rke2-images.linux-amd64.tar.zst` to import images from the tar file into docker.
 . Use `docker tag` and `docker push` to retag and push the loaded images to your private registry.
 . Follow the xref:./private_registry.adoc[Private Registry Configuration] guide to create and configure the `registries.yaml` file.
 . Proceed to the <<_2_install_rke2,Install RKE2>> section below.
@@ -98,6 +98,82 @@ When this feature is enabled, it will not be possible to ensure that all images 
 
 --
 
+Hauler Method::
++
+--
+
+== Hauler
+
+The airgap tool https://docs.hauler.dev/docs/intro[Hauler] allows you to aggregate and transport the RKE2 artifacts to disconnected environments, where you can seed a private registry or serve a registry of the Hauler store. Follow the https://docs.hauler.dev/docs/introduction/install[Hauler installation instructions], then proceed with the following steps. This pattern is repeatable for other artifacts you may want to bring into your airgapped environment.
+
+These steps assume you have already created nodes in your airgapped environment, and are using the bundled containerd as the container runtime.
+
+. On your connected machine, download the tarball and add to your Hauler store. The tarball can be found in the RKE2 release artifacts for your desired version.
+
+[,bash]
+----
+hauler store add file rke2-images.linux-amd64.tar.zst
+----
+
+or
+
+[,bash]
+----
+hauler store add file https://github.com/rancher/rke2/releases/download/v1.34.5%2Brke2r1/rke2-images.linux-amd64.tar.zst
+----
+
+. You may also add other artifacts that will be needed on the airgapped host to the https://docs.hauler.dev/docs/hauler-usage/store/add/file[Hauler store]. For example, you could add the rke2 binary tarball and checksum file, which you will need to verify artifacts when running the install script.
+
+[,bash]
+----
+hauler store add file https://get.rke2.io
+
+hauler store add file https://github.com/rancher/rke2/releases/download/v1.34.5%2Brke2r1/rke2.linux-amd64.tar.gz
+
+hauler store add file https://github.com/rancher/rke2/releases/download/v1.34.5%2Brke2r1/sha256sum-amd64.txt
+----
+
+. Save the Hauler store to a file. The `--containerd` flag ensures the tarball is compatible if copied directly into containerd.
+
+[,bash]
+----
+hauler store save --filename haul.tar.zst --containerd
+----
+
+. On your airgapped host with the Hauler CLI installed and .tar.zst file available, load the stored content.
+
+[,bash]
+----
+hauler store load haul.tar.zst
+----
+
+. You can save the Hauler store content directly to the images directory. For RKE2, ensure the directory `/var/lib/rancher/rke2/agent/images/` exists on the node, then save the tarbarll to that path:
+
+[,bash]
+----
+hauler store save --containerd -f /var/lib/rancher/rke2/agent/images/haul.tar.zst
+----
+
+. If you have a private registry available, you could also copy the artifacts using Hauler. If the registry is authenticated, login with `hauler store login <airgap.private.registry> -u <username> -p <password>` first.
+
+[,bash]
+----
+hauler store copy registry://airgap.private.registry
+----
+
+. Follow the RKE2 <<_2_install_rke2,install instructions>>. Extract files needed for the install from the Hauler store. Use `hauler store info` to identify the exact artifact names in your store.
+
+[,bash]
+----
+hauler store extract install.sh --output /root/rke2-artifacts
+
+hauler store extract sha256sum.txt --output /root/rke2-artifacts
+
+hauler store extract rke2-binary:v1.34.5-rke2r1 --output /usr/local/bin
+----
+
+--
+
 Embedded Registry Mirror::
 +
 --
@@ -133,6 +209,11 @@ If your nodes do not have an interface with a default route, a default route mus
   ip route add default via 203.0.113.255 dev dummy0 metric 1000
 ----
 
+The example uses `203.0.113.0/24`, which is TEST-NET-3 (reserved for documentation by RFC 5737). Any range will work as long as it does not overlap with the cluster CIDR, the service CIDR or any other network reachable from the node.
+
+Note that the commands above apply only to the running system and will be lost on reboot. To make the configuration persistent, configure the dummy interface and default route through your distribution's network management system (such as `systemd-networkd`, `NetworkManager`, or `netplan`), or via a `systemd` oneshot unit ordered `Before=rke2-server.service` and `Before=rke2-agent.service`. The default route must be in place before RKE2 starts.
+
+Once configured, confirm the default route is present with `ip route show default`. After RKE2 starts, confirm the node's primary IP was detected correctly with `kubectl get nodes -o wide`.
 ======
 
 [%collapsible]
