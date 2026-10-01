@@ -16,6 +16,7 @@
   "dependencies": {
     "@docusaurus/core": "^3.10.2",
     "@docusaurus/plugin-client-redirects": "^3.10.2",
+    "@docusaurus/plugin-content-docs": "^3.10.2",
     "@docusaurus/preset-classic": "^3.10.2",
     "@docusaurus/theme-common": "^3.10.2",
     "@docusaurus/theme-mermaid": "^3.10.2",
@@ -30,7 +31,8 @@
     "remark-validate-links": "^13.0.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.10.2"
+    "@docusaurus/module-type-aliases": "^3.10.2",
+    "@types/react": "^19.3.0"
   },
   "browserslist": {
     "production": [
@@ -49,5 +51,5 @@
       "remark-validate-links"
     ]
   },
-  "packageManager": "yarn@4.9.4"
+  "packageManager": "yarn@4.18.1"
 }

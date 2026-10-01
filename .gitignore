@@ -1,6 +1,7 @@
 # Dependencies
 /node_modules
 install-state.gz
+.yarn
 
 # Production
 /build
